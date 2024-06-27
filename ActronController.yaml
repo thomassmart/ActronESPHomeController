@@ -1,0 +1,138 @@
+substitutions:
+  name: "actron-ac-controller"
+  friendly_name: Actron AC Controller
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2024.6.0
+  name_add_mac_suffix: false
+  project:
+    name: esphome.web
+    version: '1.0'
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+# Allow Over-The-Air updates
+ota:
+- platform: esphome
+
+# Allow provisioning Wi-Fi via serial
+improv_serial:
+
+wifi:
+  # Set up a wifi access point
+  ap: {}
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+captive_portal:
+
+dashboard_import:
+  package_import_url: github://esphome/example-configs/esphome-web/esp32.yaml@main
+  import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+esp32_improv:
+  authorizer: none
+
+# To have a "next url" for improv serial
+web_server:
+
+#Actron Air Controller
+output:
+  - platform: gpio
+    pin: GPIO14
+    id: actron_power_button
+  - platform: gpio
+    pin: GPIO01
+    id: actron_zone1_button
+  - platform: gpio
+    pin: GPIO03
+    id: actron_zone2_button
+
+switch:
+  - platform: template
+    name: "Actron Air Conditioning Power Switch"
+    icon: "mdi:air-conditioner"
+    lambda: |-
+      if (id(actron_power_state).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - output.turn_on: actron_power_button
+      - delay: 500ms
+      - output.turn_off: actron_power_button
+    turn_off_action:
+      - output.turn_on: actron_power_button
+      - delay: 500ms
+      - output.turn_off: actron_power_button
+  - platform: template
+    name: "Actron Air Zone 1 Switch"
+    icon: "mdi:air-conditioner"
+    lambda: |-
+      if (id(actron_zone1_state).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - output.turn_on: actron_zone1_button
+      - delay: 500ms
+      - output.turn_off: actron_zone1_button
+    turn_off_action:
+      - output.turn_on: actron_zone1_button
+      - delay: 500ms
+      - output.turn_off: actron_zone1_button
+  - platform: template
+    name: "Actron Air Zone 2 Switch"
+    icon: "mdi:air-conditioner"
+    lambda: |-
+      if (id(actron_zone2_state).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - output.turn_on: actron_zone2_button
+      - delay: 500ms
+      - output.turn_off: actron_zone2_button
+    turn_off_action:
+      - output.turn_on: actron_zone2_button
+      - delay: 500ms
+      - output.turn_off: actron_zone2_button
+
+
+binary_sensor:
+  - platform: gpio
+    pin: GPIO12
+    id: actron_power_state
+    name: "Actron Air Conditioning Power State"
+    icon: "mdi:air-conditioner"
+    device_class: power
+  - platform: gpio
+    pin: GPIO23
+    id: actron_zone1_state
+    name: "Actron Air Zone 1 State"
+    icon: "mdi:air-conditioner"
+    device_class: power
+  - platform: gpio
+    pin: GPIO22
+    id: actron_zone2_state
+    name: "Actron Air Zone 2 State"
+    icon: "mdi:air-conditioner"
+    device_class: power
+
+
